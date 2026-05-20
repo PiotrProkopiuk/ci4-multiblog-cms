@@ -19,9 +19,23 @@
         <option value="de" <?= ($post['language'] ?? '') === 'de' ? 'selected' : '' ?>>Deutsch</option>
     </select>
     <label class="form-label fw-semibold">Status</label>
+    <?php $currentStatus = $post['status'] ?? 'draft'; ?>
+    <?php if (in_array($currentStatus, ['review_pending', 'approved'], true)): ?>
+        <div class="alert alert-info py-2 mb-2">
+            Wpis jest w statusie <strong><?= esc($currentStatus === 'review_pending' ? 'Do recenzji' : 'Zatwierdzony') ?></strong> — zmiana treści cofnie go do szkicu.
+        </div>
+    <?php endif; ?>
+    <?php if ($currentStatus === 'rejected' && ! empty($post['reject_reason'])): ?>
+        <div class="alert alert-danger py-2 mb-2">
+            <strong>Odrzucono:</strong> <?= esc($post['reject_reason']) ?>
+        </div>
+    <?php endif; ?>
     <select class="form-select" name="status">
-        <option value="draft" <?= ($post['status'] ?? 'draft') === 'draft' ? 'selected' : '' ?>>Draft</option>
-        <option value="publish" <?= ($post['status'] ?? '') === 'publish' ? 'selected' : '' ?>>Publish</option>
+        <option value="draft" <?= $currentStatus === 'draft' ? 'selected' : '' ?>>Szkic (draft)</option>
+        <option value="rejected" <?= $currentStatus === 'rejected' ? 'selected' : '' ?> <?= ! in_array($currentStatus, ['rejected'], true) ? 'disabled style="display:none"' : '' ?>>Odrzucony</option>
+        <option value="review_pending" <?= $currentStatus === 'review_pending' ? 'selected' : '' ?> <?= $currentStatus !== 'review_pending' ? 'disabled style="display:none"' : '' ?>>Do recenzji</option>
+        <option value="approved" <?= $currentStatus === 'approved' ? 'selected' : '' ?> <?= $currentStatus !== 'approved' ? 'disabled style="display:none"' : '' ?>>Zatwierdzony</option>
+        <option value="publish" <?= $currentStatus === 'publish' ? 'selected' : '' ?>>Opublikowany (publish)</option>
     </select>
     <label class="form-label fw-semibold">Content</label>
     <textarea class="form-control" id="content" name="content" rows="16"><?= esc($post['content'] ?? '') ?></textarea>

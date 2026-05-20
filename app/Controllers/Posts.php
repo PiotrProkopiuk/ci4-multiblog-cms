@@ -30,6 +30,7 @@ class Posts extends BaseController
             'title' => 'Posts',
             'blog' => $blog,
             'posts' => $posts,
+            'statuses' => PostModel::STATUSES,
         ]);
     }
 
@@ -130,6 +131,129 @@ class Posts extends BaseController
         }
 
         return redirect()->to(site_url('admin/posts'));
+    }
+
+    public function submitReview(int $id)
+    {
+        if ($redirect = $this->requireAuth()) {
+            return $redirect;
+        }
+
+        $blog = (new BlogContext())->current();
+        $post = $this->posts->where('blog_id', $blog['id'])->find($id);
+
+        if (! $post) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $allowed = ['draft', 'rejected'];
+
+        if (! in_array($post['status'], $allowed, true)) {
+            return redirect()->to(site_url('admin/posts'))->with('flash_error', 'Tylko szkic lub odrzucony wpis może być wysłany do recenzji.');
+        }
+
+        $this->posts->update($id, ['status' => 'review_pending', 'reject_reason' => null]);
+
+        return redirect()->to(site_url('admin/posts'))->with('flash_success', 'Wpis wysłany do recenzji.');
+    }
+
+    public function reviewQueue()
+    {
+        if ($redirect = $this->requireAuth()) {
+            return $redirect;
+        }
+
+        $blog = (new BlogContext())->current();
+        $pending = $this->posts
+            ->where('blog_id', $blog['id'])
+            ->where('status', 'review_pending')
+            ->orderBy('updated_at', 'ASC')
+            ->findAll();
+
+        return view('posts/review_queue', [
+            'title' => 'Review queue',
+            'blog' => $blog,
+            'posts' => $pending,
+        ]);
+    }
+
+    public function reviewPost(int $id)
+    {
+        if ($redirect = $this->requireAuth()) {
+            return $redirect;
+        }
+
+        $blog = (new BlogContext())->current();
+        $post = $this->posts->where('blog_id', $blog['id'])->find($id);
+
+        if (! $post) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return view('posts/review_detail', [
+            'title' => 'Review: ' . $post['title'],
+            'blog' => $blog,
+            'post' => $post,
+        ]);
+    }
+
+    public function approve(int $id)
+    {
+        if ($redirect = $this->requireAuth()) {
+            return $redirect;
+        }
+
+        $blog = (new BlogContext())->current();
+        $post = $this->posts->where('blog_id', $blog['id'])->find($id);
+
+        if (! $post) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $imageUrl = trim((string) $this->request->getPost('featured_image_url')) ?: ($post['featured_image_url'] ?? null);
+
+        if (empty($imageUrl)) {
+            return view('posts/review_detail', [
+                'title' => 'Review: ' . $post['title'],
+                'blog' => $blog,
+                'post' => $post,
+                'errors' => ['Musisz wybrać zdjęcie główne przed zatwierdzeniem wpisu.'],
+            ]);
+        }
+
+        $this->posts->update($id, [
+            'status' => 'publish',
+            'reject_reason' => null,
+            'featured_image_url' => $imageUrl,
+            'featured_image_alt' => trim((string) $this->request->getPost('featured_image_alt')) ?: null,
+            'featured_image_source' => trim((string) $this->request->getPost('featured_image_source')) ?: null,
+            'featured_image_author' => trim((string) $this->request->getPost('featured_image_author')) ?: null,
+        ]);
+
+        return redirect()->to(site_url('admin/posts/review'))->with('flash_success', 'Wpis zatwierdzony i opublikowany.');
+    }
+
+    public function reject(int $id)
+    {
+        if ($redirect = $this->requireAuth()) {
+            return $redirect;
+        }
+
+        $blog = (new BlogContext())->current();
+        $post = $this->posts->where('blog_id', $blog['id'])->find($id);
+
+        if (! $post) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $reason = trim((string) $this->request->getPost('reject_reason'));
+
+        $this->posts->update($id, [
+            'status' => 'rejected',
+            'reject_reason' => $reason ?: null,
+        ]);
+
+        return redirect()->to(site_url('admin/posts/review'))->with('flash_success', 'Wpis odrzucony.');
     }
 
     private function requireAuth()

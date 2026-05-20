@@ -1,0 +1,4 @@
+[[services]]
+localPort = 8099
+name = "CodeIgniter CMS"
+paths = ["/"]

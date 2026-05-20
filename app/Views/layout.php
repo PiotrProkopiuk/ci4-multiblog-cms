@@ -45,9 +45,12 @@
                 <a class="small fw-semibold" href="<?= site_url('en') ?>">EN</a>
                 <a class="small fw-semibold" href="<?= site_url('de') ?>">DE</a>
                 <?php if (session('is_logged_in')): ?>
-                    <a class="small fw-semibold" href="<?= site_url('admin/posts') ?>">Admin</a>
-                    <a class="small fw-semibold" href="<?= site_url('admin/translations') ?>">Translations</a>
-                    <a class="btn btn-sm btn-outline-dark" href="<?= site_url('logout') ?>">Logout</a>
+                    <a class="small fw-semibold" href="<?= site_url('admin/posts') ?>">Wpisy</a>
+                    <a class="small fw-semibold" href="<?= site_url('admin/posts/review') ?>">Recenzja</a>
+                    <a class="small fw-semibold" href="<?= site_url('admin/generate') ?>">✨ AI Generator</a>
+                    <a class="small fw-semibold" href="<?= site_url('admin/blogs') ?>">⚙️ Blogi</a>
+                    <a class="small fw-semibold" href="<?= site_url('admin/translations') ?>">Tłumaczenia</a>
+                    <a class="btn btn-sm btn-outline-dark" href="<?= site_url('logout') ?>">Wyloguj</a>
                 <?php else: ?>
                     <a class="btn btn-sm btn-outline-dark" href="<?= site_url('login') ?>"><?= esc($tr('nav.login', 'Login')) ?></a>
                 <?php endif; ?>

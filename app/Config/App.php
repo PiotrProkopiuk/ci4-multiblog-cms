@@ -16,7 +16,19 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'https://8895da5b-fd07-4e35-b579-ee45ae7027e4-00-2obalqcl1132j.worf.replit.dev:8099/';
+    public string $baseURL = '';
+
+    public function __construct()
+    {
+        parent::__construct();
+        $domain = getenv('REPLIT_DEV_DOMAIN') ?: getenv('REPLIT_DOMAINS') ?: '';
+        if ($domain) {
+            $this->baseURL = 'https://' . explode(',', $domain)[0] . '/';
+        } elseif (isset($_SERVER['HTTP_HOST'])) {
+            $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $this->baseURL = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/';
+        }
+    }
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.

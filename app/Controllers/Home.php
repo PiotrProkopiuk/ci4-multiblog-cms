@@ -15,7 +15,7 @@ class Home extends BaseController
         $blog = $context->current();
         $language = $this->resolveLanguage($locale);
         $translations = (new Translator())->all((int) $blog['id'], $language);
-        $theme = BlogTheme::forSlug($blog['slug']);
+        $theme = BlogTheme::forBlog($blog);
         $posts = (new PostModel())
             ->where('blog_id', $blog['id'])
             ->where('language', $language)
@@ -39,7 +39,7 @@ class Home extends BaseController
         $blog = $context->current();
         $language = $this->resolveLanguage($locale);
         $translations = (new Translator())->all((int) $blog['id'], $language);
-        $theme = BlogTheme::forSlug($blog['slug']);
+        $theme = BlogTheme::forBlog($blog);
         $post = (new PostModel())
             ->where('blog_id', $blog['id'])
             ->where('language', $language)
