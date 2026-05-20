@@ -44,22 +44,39 @@
                 <a class="small fw-semibold" href="<?= site_url('pl') ?>">PL</a>
                 <a class="small fw-semibold" href="<?= site_url('en') ?>">EN</a>
                 <a class="small fw-semibold" href="<?= site_url('de') ?>">DE</a>
-                <?php if (session('is_logged_in')): ?>
-                    <a class="small fw-semibold" href="<?= site_url('admin/posts') ?>">Wpisy</a>
-                    <a class="small fw-semibold" href="<?= site_url('admin/posts/review') ?>">Recenzja</a>
-                    <a class="small fw-semibold" href="<?= site_url('admin/generate') ?>">✨ AI Generator</a>
-                    <a class="small fw-semibold" href="<?= site_url('admin/blogs') ?>">⚙️ Blogi</a>
-                    <a class="small fw-semibold" href="<?= site_url('admin/translations') ?>">Tłumaczenia</a>
-                    <a class="btn btn-sm btn-outline-dark" href="<?= site_url('logout') ?>">Wyloguj</a>
-                <?php else: ?>
-                    <a class="btn btn-sm btn-outline-dark" href="<?= site_url('login') ?>"><?= esc($tr('nav.login', 'Login')) ?></a>
-                <?php endif; ?>
+                <?php /* Ukryty przycisk logowania – dostęp wyłącznie przez bezpośredni link */ ?>
             </div>
         </div>
     </nav>
-    <main class="container py-4 py-lg-5">
-        <?= $this->renderSection('content') ?>
-    </main>
+
+    <?php $uri = service('uri'); $isAdmin = ($uri->getSegment(1) === 'admin'); ?>
+
+    <?php if ($isAdmin && session('is_logged_in')): ?>
+        <div class="container-fluid">
+            <div class="row">
+                <aside class="col-12 col-md-3 col-lg-2 py-4">
+                    <div class="cms-panel sticky-top" style="top:80px">
+                        <div class="fw-bold mb-2">Panel</div>
+                        <ul class="nav flex-column small">
+                            <li class="nav-item"><a class="nav-link" href="<?= site_url('admin/posts') ?>">Wpisy</a></li>
+                            <li class="nav-item"><a class="nav-link" href="<?= site_url('admin/posts/review') ?>">Recenzja</a></li>
+                            <li class="nav-item"><a class="nav-link" href="<?= site_url('admin/generate') ?>">✨ AI Generator</a></li>
+                            <li class="nav-item"><a class="nav-link" href="<?= site_url('admin/blogs') ?>">⚙️ Blogi</a></li>
+                            <li class="nav-item"><a class="nav-link" href="<?= site_url('admin/translations') ?>">Tłumaczenia</a></li>
+                            <li class="nav-item mt-2"><a class="nav-link text-danger" href="<?= site_url('logout') ?>">Wyloguj</a></li>
+                        </ul>
+                    </div>
+                </aside>
+                <main class="col-12 col-md-9 col-lg-10 py-4 py-lg-5">
+                    <?= $this->renderSection('content') ?>
+                </main>
+            </div>
+        </div>
+    <?php else: ?>
+        <main class="container py-4 py-lg-5">
+            <?= $this->renderSection('content') ?>
+        </main>
+    <?php endif; ?>
 </div>
 </body>
 </html>
