@@ -9,6 +9,9 @@ class BlogModel extends Model
     protected $table = 'blogs';
     protected $primaryKey = 'id';
     protected $returnType = 'array';
-    protected $allowedFields = ['name', 'slug', 'domain', 'default_language', 'description', 'homepage_layout', 'accent_color', 'hero_image_url', 'tagline'];
+    protected $allowedFields = [
+        'name', 'slug', 'description', 'domain', 'default_language',
+        'homepage_layout', 'accent_color', 'hero_image_url', 'tagline', 'languages'
+    ];
     protected $useTimestamps = true;
 }

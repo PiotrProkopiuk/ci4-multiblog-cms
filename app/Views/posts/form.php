@@ -12,12 +12,31 @@
 <form method="post" action="<?= esc($action) ?>" class="cms-panel">
     <label class="form-label fw-semibold">Title</label>
     <input class="form-control" id="post-title" type="text" name="title" value="<?= esc($post['title'] ?? '') ?>" required>
-    <label class="form-label fw-semibold">Language</label>
-    <select class="form-select" name="language">
-        <option value="en" <?= ($post['language'] ?? 'en') === 'en' ? 'selected' : '' ?>>English</option>
-        <option value="pl" <?= ($post['language'] ?? '') === 'pl' ? 'selected' : '' ?>>Polski</option>
-        <option value="de" <?= ($post['language'] ?? '') === 'de' ? 'selected' : '' ?>>Deutsch</option>
-    </select>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">Language</label>
+            <select class="form-select" name="language">
+                <option value="en" <?= ($post['language'] ?? 'en') === 'en' ? 'selected' : '' ?>>English</option>
+                <option value="pl" <?= ($post['language'] ?? '') === 'pl' ? 'selected' : '' ?>>Polski</option>
+                <option value="de" <?= ($post['language'] ?? '') === 'de' ? 'selected' : '' ?>>Deutsch</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">Category</label>
+            <select class="form-select" name="category_id">
+                <option value="">— no category —</option>
+                <?php foreach (($categories ?? []) as $cat): ?>
+                    <option value="<?= (int) $cat['id'] ?>" <?= (isset($post['category_id']) && (int)$post['category_id'] === (int)$cat['id']) ? 'selected' : '' ?>><?= esc($cat['name']) ?> (<?= esc($cat['language']) ?>)</option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">Slug</label>
+            <input class="form-control" type="text" name="slug" value="<?= esc($post['slug'] ?? '') ?>" placeholder="auto from title if empty">
+        </div>
+    </div>
+
     <label class="form-label fw-semibold">Status</label>
     <?php $currentStatus = $post['status'] ?? 'draft'; ?>
     <?php if (in_array($currentStatus, ['review_pending', 'approved'], true)): ?>
@@ -37,6 +56,7 @@
         <option value="approved" <?= $currentStatus === 'approved' ? 'selected' : '' ?> <?= $currentStatus !== 'approved' ? 'disabled style="display:none"' : '' ?>>Zatwierdzony</option>
         <option value="publish" <?= $currentStatus === 'publish' ? 'selected' : '' ?>>Opublikowany (publish)</option>
     </select>
+
     <label class="form-label fw-semibold">Content</label>
     <textarea class="form-control" id="content" name="content" rows="16"><?= esc($post['content'] ?? '') ?></textarea>
 

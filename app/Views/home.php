@@ -4,6 +4,7 @@
 <?php
 $tr = static fn($key, $fallback) => $t[$key] ?? $fallback;
 $layout = $theme['layout'] ?? 'variant_a';
+$isAdminUser = (session('is_logged_in') && session('role') === 'admin');
 ?>
 
 <?php if ($layout === 'variant_b'): ?>
@@ -99,7 +100,12 @@ $layout = $theme['layout'] ?? 'variant_a';
                                 style="height:<?= $i === 0 ? '240px' : '150px' ?>;width:100%;object-fit:cover">
                         <?php endif; ?>
                         <p class="small text-uppercase text-muted fw-bold mb-2"><?= esc($post['language']) ?> · <?= esc(date('d.m.Y', strtotime($post['updated_at']))) ?></p>
-                        <h3 class="<?= $i === 0 ? 'h3' : 'h5' ?>"><a href="<?= site_url($language . '/posts/' . $post['id']) ?>"><?= esc($post['title']) ?></a></h3>
+                        <h3 class="<?= $i === 0 ? 'h3' : 'h5' ?>">
+                            <a href="<?= site_url($language . '/' . ($post['category_slug'] ?: '') . '/' . $post['slug']) ?>"><?= esc($post['title']) ?></a>
+                            <?php if ($isAdminUser): ?>
+                                <a href="<?= site_url('admin/posts/' . $post['id'] . '/edit') ?>" class="ms-2 small text-muted" title="Edytuj" target="_blank" rel="noopener">✎</a>
+                            <?php endif; ?>
+                        </h3>
                         <p class="text-muted"><?= character_limiter(strip_tags($post['content']), $i === 0 ? 220 : 120) ?></p>
                         <a class="fw-semibold" href="<?= site_url($language . '/posts/' . $post['id']) ?>"><?= esc($tr('posts.read_more', 'Read more')) ?></a>
                     </article>
@@ -115,6 +121,9 @@ $layout = $theme['layout'] ?? 'variant_a';
                     <div class="border-bottom pb-2">
                         <p class="small text-muted mb-1"><?= esc(date('d.m.Y', strtotime($post['updated_at']))) ?></p>
                         <a class="fw-semibold small" href="<?= site_url($language . '/posts/' . $post['id']) ?>"><?= esc($post['title']) ?></a>
+                        <?php if ($isAdminUser): ?>
+                            <a href="<?= site_url('admin/posts/' . $post['id'] . '/edit') ?>" class="ms-2 small text-muted" title="Edytuj" target="_blank" rel="noopener">✎</a>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
                 <?php if (count($posts) <= 6): ?><p class="text-muted small mb-0">Więcej wkrótce.</p><?php endif; ?>
@@ -131,9 +140,14 @@ $layout = $theme['layout'] ?? 'variant_a';
                     <img src="<?= esc($post['featured_image_url']) ?>" alt="<?= esc($post['featured_image_alt'] ?? $post['title']) ?>" class="img-fluid rounded-4 mb-3" style="height:180px;width:100%;object-fit:cover">
                 <?php endif; ?>
                 <p class="small text-uppercase text-muted fw-bold mb-2"><?= esc($post['language']) ?> · <?= esc(date('d.m.Y', strtotime($post['updated_at']))) ?></p>
-                <h3 class="h4"><a href="<?= site_url($language . '/posts/' . $post['id']) ?>"><?= esc($post['title']) ?></a></h3>
+                <h3 class="h4">
+                    <a href="<?= site_url($language . '/' . $post['category_slug'] . '/' . $post['slug']) ?>"><?= esc($post['title']) ?></a>
+                    <?php if ($isAdminUser): ?>
+                        <a href="<?= site_url('admin/posts/' . $post['id'] . '/edit') ?>" class="ms-2 small text-muted" title="Edytuj" target="_blank" rel="noopener">✎</a>
+                    <?php endif; ?>
+                </h3>
                 <p class="text-muted"><?= character_limiter(strip_tags($post['content']), 170) ?></p>
-                <a class="fw-semibold" href="<?= site_url($language . '/posts/' . $post['id']) ?>"><?= esc($tr('posts.read_more', 'Read more')) ?></a>
+                <a class="fw-semibold" href="<?= site_url($language . '/' . $post['category_slug'] . '/' . $post['slug']) ?>"><?= esc($tr('posts.read_more', 'Read more')) ?></a>
             </article>
         </div>
     <?php endforeach; ?>

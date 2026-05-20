@@ -116,13 +116,18 @@ const nameInput = document.getElementById('nameInput');
 const slugInput = document.getElementById('slugInput');
 nameInput.addEventListener('input', () => {
     if (! slugInput.dataset.manual) {
-        slugInput.value = nameInput.value
-            .toLowerCase().normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        slugInput.value = sanitizeUrl(nameInput.value);
     }
 });
 slugInput.addEventListener('input', () => { slugInput.dataset.manual = '1'; });
+
+// Function to sanitize URL
+function sanitizeUrl(value) {
+    return value
+        .toLowerCase().normalize('NFD')
+        .replace(/[^\w\-]+/g, '-') // Replace non-alphanumeric characters with hyphens
+        .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+}
 
 // Color sync
 const cp = document.getElementById('colorPicker');

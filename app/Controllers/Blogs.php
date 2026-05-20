@@ -64,6 +64,7 @@ class Blogs extends BaseController
             'homepage_layout'  => $this->request->getPost('homepage_layout') ?: 'variant_a',
             'accent_color'     => $this->request->getPost('accent_color') ?: null,
             'tagline'          => $this->request->getPost('tagline') ?: null,
+            'languages'        => json_encode($this->request->getPost('languages') ?: [$this->request->getPost('default_language') ?: 'pl']),
         ]);
 
         return redirect()->to(site_url('admin/blogs/' . $id . '/edit'))

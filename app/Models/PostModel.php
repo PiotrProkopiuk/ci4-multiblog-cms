@@ -9,7 +9,7 @@ class PostModel extends Model
     protected $table = 'posts';
     protected $primaryKey = 'id';
     protected $returnType = 'array';
-    protected $allowedFields = ['blog_id', 'user_id', 'title', 'content', 'status', 'language', 'featured_image_url', 'featured_image_alt', 'featured_image_source', 'featured_image_author', 'reject_reason'];
+    protected $allowedFields = ['blog_id', 'user_id', 'title', 'content', 'status', 'language', 'featured_image_url', 'featured_image_alt', 'featured_image_source', 'featured_image_author', 'reject_reason', 'slug', 'category_id'];
     protected $useTimestamps = true;
     protected $validationRules = [
         'title' => 'required|min_length[3]|max_length[255]',

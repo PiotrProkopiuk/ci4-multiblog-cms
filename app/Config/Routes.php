@@ -42,6 +42,11 @@ $routes->group('admin', static function ($routes) {
     $routes->post('stock-images/suggest', 'StockImages::suggest');
 });
 
+// Pretty post URLs: /{lang}/{category_slug}/{post_slug}
+$routes->get('(:segment)/(:segment)/(:segment)', 'Home::showBySlug/$1/$2/$3');
+
+// Backwards-compatible: /{lang}/posts/{id}
+$routes->get('(:segment)/posts/(:num)', 'Home::show/$2/$1');
+
 $routes->post('wp-json/wp/v2/posts', 'Api\Posts::create');
 $routes->get('(:segment)', 'Home::index/$1');
-$routes->get('(:segment)/posts/(:num)', 'Home::show/$2/$1');

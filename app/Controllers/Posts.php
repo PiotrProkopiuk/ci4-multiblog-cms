@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\BlogContext;
 use App\Models\PostModel;
+use App\Models\CategoryModel;
 
 class Posts extends BaseController
 {
@@ -40,11 +41,17 @@ class Posts extends BaseController
             return $redirect;
         }
 
+        $categories = (new CategoryModel())
+            ->where('blog_id', (new BlogContext())->current()['id'])
+            ->orderBy('name','ASC')
+            ->findAll();
+
         return view('posts/form', [
             'title' => 'New post',
             'post' => null,
             'errors' => [],
             'action' => site_url('admin/posts'),
+            'categories' => $categories,
         ]);
     }
 
@@ -58,11 +65,16 @@ class Posts extends BaseController
         $data = $this->postData($blog['id']);
 
         if (! $this->posts->save($data)) {
+            $categories = (new CategoryModel())
+                ->where('blog_id', $blog['id'])
+                ->orderBy('name','ASC')
+                ->findAll();
             return view('posts/form', [
                 'title' => 'New post',
                 'post' => $data,
                 'errors' => $this->posts->errors(),
                 'action' => site_url('admin/posts'),
+                'categories' => $categories,
             ]);
         }
 
@@ -82,11 +94,17 @@ class Posts extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
+        $categories = (new CategoryModel())
+            ->where('blog_id', $blog['id'])
+            ->orderBy('name','ASC')
+            ->findAll();
+
         return view('posts/form', [
             'title' => 'Edit post',
             'post' => $post,
             'errors' => [],
             'action' => site_url("admin/posts/{$id}"),
+            'categories' => $categories,
         ]);
     }
 
@@ -106,11 +124,16 @@ class Posts extends BaseController
         $data = $this->postData($blog['id']) + ['id' => $id];
 
         if (! $this->posts->save($data)) {
+            $categories = (new CategoryModel())
+                ->where('blog_id', $blog['id'])
+                ->orderBy('name','ASC')
+                ->findAll();
             return view('posts/form', [
                 'title' => 'Edit post',
                 'post' => $data,
                 'errors' => $this->posts->errors(),
                 'action' => site_url("admin/posts/{$id}"),
+                'categories' => $categories,
             ]);
         }
 
@@ -267,10 +290,17 @@ class Posts extends BaseController
 
     private function postData(int $blogId): array
     {
+        $title = trim((string) $this->request->getPost('title'));
+        $slug  = trim((string) $this->request->getPost('slug')) ?: url_title($title, '-', true);
+        $categoryId = $this->request->getPost('category_id');
+        $categoryId = $categoryId !== null && $categoryId !== '' ? (int) $categoryId : null;
+
         return [
             'blog_id' => $blogId,
             'user_id' => $this->session->get('user_id'),
-            'title' => trim((string) $this->request->getPost('title')),
+            'title' => $title,
+            'slug' => $slug,
+            'category_id' => $categoryId,
             'content' => (string) $this->request->getPost('content'),
             'status' => (string) $this->request->getPost('status'),
             'language' => (string) $this->request->getPost('language'),

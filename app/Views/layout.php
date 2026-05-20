@@ -36,6 +36,7 @@
 <?php $t = $t ?? []; $tr = static fn($key, $fallback) => $t[$key] ?? $fallback; ?>
 <body class="<?= esc($theme['class'] ?? 'theme-default') ?>">
 <?php $uri = service('uri'); $isAdmin = ($uri->getSegment(1) === 'admin'); $isAdminUser = (session('is_logged_in') && session('role') === 'admin'); ?>
+<?php $langs = $languagesAvailable ?? ($blog['languages'] ?? ['pl','en','de']); $langs = array_values(array_unique(array_filter((array) $langs))); ?>
 <div class="site-shell">
     <nav class="navbar navbar-expand-lg sticky-top glass-nav">
         <div class="container py-2">
@@ -44,9 +45,13 @@
                 <?= esc($blog['name'] ?? 'Multi Blog CMS') ?>
             </a>
             <div class="d-flex flex-wrap align-items-center gap-3">
-                <a class="small fw-semibold" href="<?= site_url('pl') ?>">PL</a>
-                <a class="small fw-semibold" href="<?= site_url('en') ?>">EN</a>
-                <a class="small fw-semibold" href="<?= site_url('de') ?>">DE</a>
+                <?php if (count($langs) > 1): ?>
+                    <select class="form-select form-select-sm" aria-label="Language selector" onchange="if(this.value){location.href='<?= site_url('') ?>'+this.value;}">
+                        <?php foreach ($langs as $lang): ?>
+                            <option value="<?= esc($lang) ?>" <?= isset($language) && $language === $lang ? 'selected' : '' ?>><?= strtoupper(esc($lang)) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php endif; ?>
                 <?php /* Ukryty przycisk logowania – dostęp wyłącznie przez bezpośredni link */ ?>
             </div>
         </div>
