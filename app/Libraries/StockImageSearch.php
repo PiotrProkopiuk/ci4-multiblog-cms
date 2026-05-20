@@ -88,6 +88,26 @@ class StockImageSearch
             CURLOPT_HTTPHEADER => $headers,
         ]);
 
+        // Ensure SSL uses a valid CA bundle on Windows
+        $noVerify = (bool) (getenv('STOCK_SSL_NO_VERIFY') ?: env('STOCK_SSL_NO_VERIFY'));
+        if ($noVerify) {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        } else {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
+            $ca = getenv('CURL_CA_BUNDLE') ?: env('CURL_CA_BUNDLE');
+            if (! $ca && defined('ROOTPATH')) {
+                $candidate = ROOTPATH . 'certs/cacert.pem';
+                if (is_file($candidate)) {
+                    $ca = $candidate;
+                }
+            }
+            if (is_string($ca) && $ca !== '' && is_file($ca)) {
+                curl_setopt($curl, CURLOPT_CAINFO, $ca);
+            }
+        }
+
         $body = curl_exec($curl);
         $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
         $error = curl_error($curl);

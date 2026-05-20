@@ -45,6 +45,9 @@ $RECYCLE.BIN/
 .vagrant
 Vagrantfile
 
+# Do not commit local certificates
+certs/
+
 #-------------------------
 # Temporary Files
 #-------------------------

@@ -6,6 +6,7 @@ class OpenAIClient
 {
     private string $apiKey;
     private string $model;
+    private ?string $caBundle = null;
 
     public function __construct(string $model = 'gpt-4o')
     {
@@ -17,6 +18,17 @@ class OpenAIClient
 
         $this->apiKey = $key;
         $this->model  = $model;
+
+        // Prefer explicit CA bundle path via env, otherwise fall back to project certs/cacert.pem if present
+        $envCa = getenv('CURL_CA_BUNDLE') ?: env('CURL_CA_BUNDLE');
+        if (is_string($envCa) && $envCa !== '' && is_file($envCa)) {
+            $this->caBundle = $envCa;
+        } else {
+            $projectCa = defined('ROOTPATH') ? (ROOTPATH . 'certs/cacert.pem') : null;
+            if ($projectCa && is_file($projectCa)) {
+                $this->caBundle = $projectCa;
+            }
+        }
     }
 
     public function chat(array $messages, float $temperature = 0.7, int $maxTokens = 4096): string
@@ -39,6 +51,20 @@ class OpenAIClient
                 'Content-Type: application/json',
             ],
         ]);
+
+        // SSL verification settings
+        $noVerify = (bool) (getenv('OPENAI_SSL_NO_VERIFY') ?: env('OPENAI_SSL_NO_VERIFY'));
+        if ($noVerify) {
+            // Strongly discouraged: only for temporary local debugging
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        } else {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
+            if ($this->caBundle && is_file($this->caBundle)) {
+                curl_setopt($curl, CURLOPT_CAINFO, $this->caBundle);
+            }
+        }
 
         $body  = curl_exec($curl);
         $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
