@@ -100,9 +100,10 @@ php spark migrate --all --force
 echo '✔ Database ready'
 "
 
-# 5. PERMISSIONS
+# 5. PERMISSIONS (POPRAWIONE - NIE ROZWALAMY GITA)
 run "Fix permissions" "
-sudo chown -R www-data:www-data $APP_DIR
+sudo chown -R ubuntu:ubuntu $APP_DIR
+sudo chown -R www-data:www-data $APP_DIR/writable
 sudo chmod -R 775 $APP_DIR/writable
 "
 
@@ -115,12 +116,12 @@ sudo systemctl restart nginx
 # 7. HEALTH CHECK
 log "Health check..."
 
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1/)
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1/ || true)
 
-if [ \"$HTTP_CODE\" = \"200\" ]; then
-  log \"DEPLOY SUCCESS ✔ (HTTP $HTTP_CODE)\"
+if [ "$HTTP_CODE" = "200" ]; then
+  log "DEPLOY SUCCESS ✔ (HTTP $HTTP_CODE)"
 else
-  warn \"APP MAY NOT BE HEALTHY (HTTP $HTTP_CODE)\"
+  warn "APP MAY NOT BE HEALTHY (HTTP $HTTP_CODE)"
 fi
 
 log "DONE"
