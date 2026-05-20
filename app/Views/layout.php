@@ -29,10 +29,13 @@
         .button{background:var(--accent);color:white;border:0;border-radius:8px;padding:10px 14px;display:inline-block;cursor:pointer}
         .button.secondary{background:#586575}
         .button.danger{background:#b42318}
+        /* Floating Admin Button */
+        .admin-fab{position:fixed;left:16px;bottom:16px;z-index:1080;border-radius:999px;padding:10px 14px;box-shadow:0 8px 20px rgba(20,30,45,.2)}
     </style>
 </head>
 <?php $t = $t ?? []; $tr = static fn($key, $fallback) => $t[$key] ?? $fallback; ?>
 <body class="<?= esc($theme['class'] ?? 'theme-default') ?>">
+<?php $uri = service('uri'); $isAdmin = ($uri->getSegment(1) === 'admin'); $isAdminUser = (session('is_logged_in') && session('role') === 'admin'); ?>
 <div class="site-shell">
     <nav class="navbar navbar-expand-lg sticky-top glass-nav">
         <div class="container py-2">
@@ -48,8 +51,6 @@
             </div>
         </div>
     </nav>
-
-    <?php $uri = service('uri'); $isAdmin = ($uri->getSegment(1) === 'admin'); ?>
 
     <?php if ($isAdmin && session('is_logged_in')): ?>
         <div class="container-fluid">
@@ -78,5 +79,31 @@
         </main>
     <?php endif; ?>
 </div>
+
+<?php if ($isAdminUser): ?>
+    <!-- Offcanvas admin menu accessible anywhere for logged-in admin -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="adminOffcanvas" aria-labelledby="adminOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="adminOffcanvasLabel">Panel administracyjny</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="list-unstyled small mb-4">
+                <li><a class="d-block py-1" href="<?= site_url('admin/posts') ?>">Wpisy</a></li>
+                <li><a class="d-block py-1" href="<?= site_url('admin/posts/review') ?>">Recenzja</a></li>
+                <li><a class="d-block py-1" href="<?= site_url('admin/generate') ?>">✨ AI Generator</a></li>
+                <li><a class="d-block py-1" href="<?= site_url('admin/blogs') ?>">⚙️ Blogi</a></li>
+                <li><a class="d-block py-1" href="<?= site_url('admin/translations') ?>">Tłumaczenia</a></li>
+                <li class="mt-2"><a class="d-block py-1 text-danger" href="<?= site_url('logout') ?>">Wyloguj</a></li>
+            </ul>
+            <div class="text-muted small">Szybki dostęp dla zalogowanego admina.</div>
+        </div>
+    </div>
+
+    <!-- Floating button to toggle offcanvas; hidden on large screens if already on /admin -->
+    <button type="button" class="btn btn-primary admin-fab <?= $isAdmin ? 'd-lg-none' : '' ?>" data-bs-toggle="offcanvas" data-bs-target="#adminOffcanvas" aria-controls="adminOffcanvas">☰ Admin</button>
+<?php endif; ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
