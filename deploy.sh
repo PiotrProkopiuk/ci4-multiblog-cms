@@ -115,7 +115,7 @@ sudo systemctl restart nginx
 # 7. HEALTH CHECK
 log "Health check..."
 
-HTTP_CODE=\$(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1/ || true)
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1/)
 
 if [ \"$HTTP_CODE\" = \"200\" ]; then
   log \"DEPLOY SUCCESS ✔ (HTTP $HTTP_CODE)\"
